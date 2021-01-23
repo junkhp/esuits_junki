@@ -82,8 +82,6 @@ class EsEditView(View):
                 # 企業の情報(ワードクラウドなど)
                 print(es_id)
                 company_info = self._get_company_info(request, es_id)
-                print(company_info)
-                print(company_info)
                 # company_info = None
 
                 context = {
