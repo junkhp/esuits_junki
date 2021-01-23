@@ -52,7 +52,6 @@ class EsEditView(View):
             wordcloud_path = get_wordcloud(company_url)
             company_info = {"wordcloud_path": wordcloud_path[1:]}
         else:
-            print('本番環境')
             wordcloud_path = '/static/esuits/images/kanban_jyunbi.png'
             company_info = {"wordcloud_path": wordcloud_path}
         return company_info
