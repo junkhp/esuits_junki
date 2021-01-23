@@ -80,9 +80,12 @@ class EsEditView(View):
                 news_list = newsapi.get_news(es_info.company)
 
                 # 企業の情報(ワードクラウドなど)
-                print(es_id)
+                '''
+                下記のコードだと「先に画面遷移してからワードクラウド作成」ができない
                 company_info = self._get_company_info(request, es_id)
-                # company_info = None
+                '''
+                # company_info(= 作成されたワードクラウドのパス)の取得はフロント側でやる
+                company_info = None
 
                 context = {
                     'message': 'OK',
