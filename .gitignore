@@ -1,0 +1,13 @@
+es_hub_venv
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+media
+local_settings.py
+
+venv/
+.vscode/
+.DS_Store
