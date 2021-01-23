@@ -62,7 +62,6 @@ class EsEditView(View):
     
     def get(self, request, es_id):
         template_name = 'esuits/es_edit.html'
-        print('start get es edit')
         if EntrySheetesModel.objects.filter(pk=es_id).exists():
             # ESの存在を確認
             es_info = EntrySheetesModel.objects.get(pk=es_id)
@@ -74,14 +73,15 @@ class EsEditView(View):
 
                 # 関連したポスト一覧
                 related_posts_list = self._get_related_posts_list(request, es_id)
-
                 # ニュース関連
                 news_list = newsapi.get_news(es_info.company)
-
                 # 企業の情報(ワードクラウドなど)
-                print(es_id)
+                '''
+                下記のコードだと「先に画面遷移してからワードクラウド作成」ができない
                 company_info = self._get_company_info(request, es_id)
-                # company_info = None
+                '''
+                # company_info(= 作成されたワードクラウドのパス)の取得はフロント側でやる
+                company_info = None
 
                 context = {
                     'message': 'OK',
@@ -93,7 +93,7 @@ class EsEditView(View):
                     'es_group_id': es_id,
                     'num_related_posts': len(related_posts_list)
                 }
-                return render(request, template_name, context)
+                # return render(request, template_name, context)
             else:
                 # 指定されたESが存在するが，それが違う人のESの場合
                 context = {
@@ -101,7 +101,7 @@ class EsEditView(View):
                     'es_info': {},
                     'zipped_posts_info': (),
                 }
-                return render(request, template_name, context)
+                # return render(request, template_name, context)
         else:
             # 指定されたESが存在しない場合
             context = {
@@ -109,7 +109,7 @@ class EsEditView(View):
                 'es_info': {},
                 'zipped_posts_info': (),
             }
-            return render(request, template_name, context)
+        return render(request, template_name, context)
 
     def post(self, request, es_id):
         template_name = 'esuits/es_edit.html'
@@ -117,8 +117,6 @@ class EsEditView(View):
         if EntrySheetesModel.objects.filter(pk=es_id).exists():
             # ESの存在を確認
             es_info = EntrySheetesModel.objects.get(pk=es_id)
-            print('es_info.author.pk: ' + str(es_info.author.pk))
-            print('request.user.pk: ' + str(request.user.pk))
 
             if (es_info.author == request.user):
                 # 指定されたESが存在し，それが自分のESの場合
