@@ -93,7 +93,7 @@ class EsEditView(View):
                     'es_group_id': es_id,
                     'num_related_posts': len(related_posts_list)
                 }
-                return render(request, template_name, context)
+                # return render(request, template_name, context)
             else:
                 # 指定されたESが存在するが，それが違う人のESの場合
                 context = {
@@ -101,7 +101,7 @@ class EsEditView(View):
                     'es_info': {},
                     'zipped_posts_info': (),
                 }
-                return render(request, template_name, context)
+                # return render(request, template_name, context)
         else:
             # 指定されたESが存在しない場合
             context = {
@@ -109,7 +109,7 @@ class EsEditView(View):
                 'es_info': {},
                 'zipped_posts_info': (),
             }
-            return render(request, template_name, context)
+        return render(request, template_name, context)
 
     def post(self, request, es_id):
         template_name = 'esuits/es_edit.html'
