@@ -118,5 +118,5 @@ class AnswerModel(models.Model):
     version = models.IntegerField(verbose_name='バージョン', blank=True, default=1)
     answer = models.TextField(verbose_name='回答', blank=True, null=True)
 
-    def __str__(self) -> str:
-        return self.question + '_' + self.version
+    def __str__(self):
+        return self.question.question + '_' + str(self.version)

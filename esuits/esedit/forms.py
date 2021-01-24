@@ -1,11 +1,19 @@
 from django import forms
-from ..models import QuestionModel, EntrySheetesModel
+from django.forms import fields
+from ..models import QuestionModel, EntrySheetesModel, AnswerModel
 
 
 class AnswerQuestionForm(forms.ModelForm):
     '''ポスト (ESの中の一つの質問) に答えるためのフォーム'''
     class Meta:
         model = QuestionModel
+        fields = (
+            'answer',
+        )
+
+class AnswerForm(forms.ModelForm):
+    class Meta:
+        model = AnswerModel
         fields = (
             'answer',
         )

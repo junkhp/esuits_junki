@@ -10,6 +10,7 @@ from .tagcreate.views import TagCreateView
 from .logout.views import logoutfunc
 from .escreate.views import ESCreateView
 from .question_list.views import QuestionListView
+from .answer_history.views import AnswerHistoryView
 from .esedit.views import get_related_post, get_wordcloud_path
 
 
@@ -32,4 +33,6 @@ urlpatterns = [
     path('tagcreate/', TagCreateView.as_view(), name='tag_create'),
     # 質問一覧表示ページ
     path('questions/', QuestionListView.as_view(), name='questions'),
+    # 回答の履歴編集ページ
+    path('anshistory/<int:question_id>', AnswerHistoryView.as_view(), name='answer_history')
 ]
