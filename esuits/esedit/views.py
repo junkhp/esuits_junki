@@ -68,7 +68,7 @@ class EsEditView(View):
 
             if (es_info.author == request.user):
                 # 指定されたESが存在し，それが自分のESの場合
-                post_set = QuestionModel.objects.filter(entry_sheet=es_id)
+                post_set = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
                 formset = AnswerQuestionFormSet(instance=es_info)
 
                 # 関連したポスト一覧

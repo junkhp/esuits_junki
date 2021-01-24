@@ -49,7 +49,7 @@
 
                     <div class="btn-wrapper">
                       <button type="button" class="charnum-count-button">文字数をカウント</button>
-                      <span class="charnum">0</span>字
+                      <span class="charnum">{{ post.char_num}}</span>字
                       <button type="button" class="related-post-button">関連質問を表示</button>
                     </div>
                     <div class="related-post">
@@ -77,7 +77,8 @@
                   {% endfor %}
                 </ul>
                 <div class="btn-wrapper">
-                  <input type="submit" class="related-post-button value=" 保存する">
+                  <input type="button" value="戻る" onClick="javascript:history.go(-1);">
+                  <input type="submit" class="related-post-button" value="保存する">
                 </div>
               </form>
             </div>
@@ -143,10 +144,7 @@
 
     // 文字数表示
     $('.charnum-count-button').on('click', function () {
-      console.log($(this).parents('.post-list').children());
-      console.log($(this).parents('.post-list').find('.ques-textarea').children());
-      console.log($(this).parents('.post-list').find('.ques-textarea').children()[1].textContent.length);
-      var charnum = $(this).parents('.post-list').find('.ques-textarea').children()[1].textContent.length;
+      var charnum = $(this).parents('.post-list').find('.ques-textarea').children()[1].value.length;
       $(this).parents('.post-list').find('.charnum')[0].textContent = charnum;
     });
 
