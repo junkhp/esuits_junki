@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 
@@ -99,8 +100,23 @@ class QuestionModel(models.Model):
         ('public', '公開'),
         ('private', '非公開')
     ]
-    is_open = models.CharField(verbose_name='公開or非公開', max_length=20,
-                                 choices=OPEN_INFO_CHOICES, default='private', blank=True)
+    is_open = models.CharField(verbose_name='公開or非公開', max_length=20, 
+        choices=OPEN_INFO_CHOICES, default='private', blank=True)
+    selected_version = models.IntegerField(verbose_name='表示するバージョン', default=1)
 
     def __str__(self):
         return self.question
+
+
+class AnswerModel(models.Model):
+    '''回答テーブル'''
+
+    class Meta(object):
+        db_table = 'answers'
+
+    question = models.ForeignKey(QuestionModel, verbose_name='質問', on_delete=models.CASCADE)
+    version = models.IntegerField(verbose_name='バージョン', blank=True, default=1)
+    answer = models.TextField(verbose_name='回答', blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.question + '_' + self.version
