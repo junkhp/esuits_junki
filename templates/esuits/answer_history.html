@@ -6,6 +6,7 @@
     <title>Document</title>
 </head>
 <body>
+    <h1>{{ question.question }}</h1>
     {% for ans in answer_history %}
     <p>{{ ans.version }}</p>
     <p>{{ ans.answer }}</p>
