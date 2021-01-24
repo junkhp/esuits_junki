@@ -52,6 +52,6 @@ Process running mem=802M(156.8%)
 ```
 
 # (new)質問テーブルから回答を切りだし
-詳細は#11
+詳細は[#11](https://github.com/junkhp/esuiets_junki/issues/11)
  ![データベースER図](./esuits_db_history_er.png "ESUITSのデータベースのER図")
  
