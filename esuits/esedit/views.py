@@ -122,13 +122,11 @@ class EsEditView(View):
                 # 指定されたESが存在し，それが自分のESの場合
                 post_set = QuestionModel.objects.filter(entry_sheet=es_id)
                 formset = AnswerQuestionFormSet(data=request.POST, instance=es_info)
-                forms = formset.save(commit=False)
+                forms_ = formset.save(commit=False)
                 
                 if formset.is_valid():
-                    for form in forms:
+                    for form in forms_:
                         form.char_num = self._get_char_num(form)
-                        print('文字数')
-                        print(form.char_num)
                         form.save()
                     formset.save()
                     return redirect('esuits:home')

@@ -66,8 +66,8 @@ class EntrySheetesModel(models.Model):
 
     company = models.ForeignKey(CompanyModel, verbose_name='企業 ',
                                 on_delete=models.CASCADE, null=True, blank=True)
-    homepage_url = models.ForeignKey(
-        CompanyHomepageURLModel, verbose_name='ホームページURL', on_delete=models.CASCADE, null=True, blank=True)
+    homepage_url = models.ForeignKey(CompanyHomepageURLModel, verbose_name='ホームページURL', 
+        on_delete=models.CASCADE, null=True, blank=True)
     selection_type = models.CharField(verbose_name='選考種別', max_length=50, blank=True, null=True)
     author = models.ForeignKey(CustomUserModel, verbose_name='作成者', on_delete=models.CASCADE)
     is_editing = models.BooleanField(verbose_name='作成中or完成', default=True)
