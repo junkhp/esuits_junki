@@ -51,7 +51,8 @@
                       <button type="button" class="charnum-count-button">文字数をカウント</button>
                       <span class="charnum">{{ post.char_num}}</span>字
                       <button type="button" class="related-post-button">関連質問を表示</button>
-                      <a href="{% url 'esuits:answer_history' post.pk %}" class="btn" tabindex="-1" role="button">履歴を確認</a>
+                      <!-- <a href="{% url 'esuits:answer_history' post.pk %}" class="btn" tabindex="-1" role="button">履歴を確認</a> -->
+                      <input type="submit" name="history" value="履歴を確認する">
                     </div>
                     <div class="related-post">
                       <div class="pagenation-x">
@@ -79,7 +80,7 @@
                 </ul>
                 <div class="btn-wrapper">
                   <input type="button" value="戻る" onClick="javascript:history.go(-1);">
-                  <input type="submit" class="related-post-button" value="保存する">
+                  <input type="submit" name="save" class="related-post-button" value="保存する">
                 </div>
               </form>
             </div>

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 

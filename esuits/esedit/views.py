@@ -113,6 +113,11 @@ class EsEditView(View):
 
     def post(self, request, es_id):
         template_name = 'esuits/es_edit.html'
+        
+        # 履歴表示の場合
+        if 'history' in request.POST:
+            print('ans historyにリダイレクト')
+            return redirect('esuits:answer_history', question_id=es_id)
 
         if EntrySheetesModel.objects.filter(pk=es_id).exists():
             # ESの存在を確認
