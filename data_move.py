@@ -12,17 +12,13 @@ django.setup()
 from esuits.models import QuestionModel as qm, AnswerModel as am
 
 
+all_answer_question_record = list(am.objects.all().values_list('question', flat=True))
+print(all_answer_question_record)
 all_questions_record = qm.objects.all().order_by('pk')
 for q in all_questions_record:
-    am.objects.create(
-        question=q,
-        version=1,
-        answer=q.answer
-        )
-
-all_answer_record = am.objects.all()
-for a in all_answer_record:
-    print(a.pk)
-    print(a.version)
-    print(a.answer)
-    print('--------------------')
+    if q.pk not in all_answer_question_record:
+        am.objects.create(
+            question=q,
+            version=1,
+            answer=q.answer
+            )
