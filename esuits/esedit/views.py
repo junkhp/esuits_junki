@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, DeleteView, UpdateView, edit
-from django import forms
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.http.response import JsonResponse
@@ -126,10 +125,10 @@ class EsEditView(View):
                     # 指定されたESが存在し，それが自分のESの場合
                     post_set = QuestionModel.objects.filter(entry_sheet=es_id)
                     formset = AnswerQuestionFormSet(data=request.POST, instance=es_info)
-                    forms_ = formset.save(commit=False)
+                    forms = formset.save(commit=False)
 
                     if formset.is_valid():
-                        for form in forms_:
+                        for form in forms:
                             form.char_num = self._get_char_num(form)
                             form.save()
                         formset.save()
