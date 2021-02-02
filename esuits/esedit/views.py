@@ -112,64 +112,70 @@ class EsEditView(View):
         return render(request, template_name, context)
 
     def post(self, request, es_id):
+        save_message = 'save'
+        history_message = 'history'
         template_name = 'esuits/es_edit.html'
-        
-        # 履歴表示の場合
-        if 'history' in request.POST:
-            print('ans historyにリダイレクト')
-            return redirect('esuits:answer_history', question_id=es_id)
 
-        if EntrySheetesModel.objects.filter(pk=es_id).exists():
-            # ESの存在を確認
-            es_info = EntrySheetesModel.objects.get(pk=es_id)
+        # 押されたボタンが保存の場合
+        if save_message in request.POST:
+            if EntrySheetesModel.objects.filter(pk=es_id).exists():
+                # ESの存在を確認
+                es_info = EntrySheetesModel.objects.get(pk=es_id)
 
-            if (es_info.author == request.user):
-                # 指定されたESが存在し，それが自分のESの場合
-                post_set = QuestionModel.objects.filter(entry_sheet=es_id)
-                formset = AnswerQuestionFormSet(data=request.POST, instance=es_info)
-                forms_ = formset.save(commit=False)
-                
-                if formset.is_valid():
-                    for form in forms_:
-                        form.char_num = self._get_char_num(form)
-                        form.save()
-                    formset.save()
-                    return redirect('esuits:home')
+                if (es_info.author == request.user):
+                    # 指定されたESが存在し，それが自分のESの場合
+                    post_set = QuestionModel.objects.filter(entry_sheet=es_id)
+                    formset = AnswerQuestionFormSet(data=request.POST, instance=es_info)
+                    forms_ = formset.save(commit=False)
 
-                # 関連したポスト一覧
-                related_posts_list = self._get_related_posts_list(request, es_id)
+                    if formset.is_valid():
+                        for form in forms_:
+                            form.char_num = self._get_char_num(form)
+                            form.save()
+                        formset.save()
+                        return redirect('esuits:home')
 
-                # ニュース関連
-                news_list = newsapi.get_news(es_info.company)
+                    # 関連したポスト一覧
+                    related_posts_list = self._get_related_posts_list(request, es_id)
 
-                # 企業の情報(ワードクラウドなど)
-                company_info = self._get_company_info(request, es_id)
+                    # ニュース関連
+                    news_list = newsapi.get_news(es_info.company)
 
-                context = {
-                    'message': 'OK',
-                    'es_info': es_info,
-                    'formset_management_form': formset.management_form,
-                    'zipped_posts_info': zip(post_set, formset, related_posts_list),
-                    'news_list': news_list,
-                    'company_info': company_info,
-                }
-                return render(request, template_name, context)
+                    # 企業の情報(ワードクラウドなど)
+                    company_info = self._get_company_info(request, es_id)
+
+                    context = {
+                        'message': 'OK',
+                        'es_info': es_info,
+                        'formset_management_form': formset.management_form,
+                        'zipped_posts_info': zip(post_set, formset, related_posts_list),
+                        'news_list': news_list,
+                        'company_info': company_info,
+                    }
+                    return render(request, template_name, context)
+                else:
+                    # 指定されたESが存在するが，それが違う人のESの場合
+                    context = {
+                        'message': '違う人のESなので表示できません',
+                        'es_info': {},
+                        'zipped_posts_info': (),
+                    }
+                    return render(request, template_name, context)
             else:
-                # 指定されたESが存在するが，それが違う人のESの場合
+                # 指定されたESが存在しない場合
                 context = {
-                    'message': '違う人のESなので表示できません',
+                    'message': '指定されたESは存在しません',
                     'es_info': {},
                     'zipped_posts_info': (),
                 }
                 return render(request, template_name, context)
+
+        # 履歴表示の場合
+        if history_message in request.POST:
+            question_id = int(request.POST[history_message])
+            return redirect('esuits:answer_history', question_id=question_id)
         else:
-            # 指定されたESが存在しない場合
-            context = {
-                'message': '指定されたESは存在しません',
-                'es_info': {},
-                'zipped_posts_info': (),
-            }
-            return render(request, template_name, context)
+            return redirect('esuits:home')
 
 
 def get_related_post(request):

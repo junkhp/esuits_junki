@@ -16,8 +16,8 @@ class AnswerHistoryView(View):
         # テンプレート
         template = 'esuits/answer_history.html'
         question = QuestionModel.objects.get(pk=question_id)
+        print(question)
         history = AnswerModel.objects.filter(question__pk=question_id)
-        print(history)
         context = {
             'username': login_user_name,
             'question': question,
