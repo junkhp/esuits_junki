@@ -5,7 +5,7 @@ from django.urls import reverse_lazy, reverse
 from django.views import View
 
 from .forms import CreateEntrySheetForm, CreateQuestionForm
-from ..models import CompanyHomepageURLModel, CompanyModel, CustomUserModel, TagModel, EntrySheetesModel, QuestionModel
+from ..models import AnswerModel, CompanyHomepageURLModel, CompanyModel, CustomUserModel, TagModel, EntrySheetesModel, QuestionModel
 # Create your views here.
 
 
@@ -39,7 +39,7 @@ class ESCreateView(View):
         # request.POSTを修正するためにコピーする．もっといい方法ありそう
         request_post_copy = request.POST.copy()
 
-        # ESテーブルを更新
+        # ESテーブルを更新ここから
         '''
         ESを保存するときにやること
         1.企業名から企業テーブルのIDを特定．ない場合は新規登録
@@ -63,21 +63,24 @@ class ESCreateView(View):
             homepage_url_record.save()
         request_post_copy['homepage_url'] = homepage_url_record
 
-        # esを登録
+        # ESを登録
         es_form = CreateEntrySheetForm(request_post_copy)
         if es_form.is_valid():
-            es_file = es_form.save(commit=False)
-            es_file.author = author
-            es_file.is_editing = True
+            es_record = es_form.save(commit=False)
+            es_record.author = author
+            es_record.is_editing = True
             # form.save()では，作成されたレコードが返ってくる．
-            es_record = es_form.save()
+            print(type(es_record))
+            print(es_record)
+            es_record.save()
+            print(es_record)
             print('saved es_form')
         else:
             print('failed save es_form')
+        # ESテーブル更新ここまで
 
-        # 質問テーブルを更新
+        # 質問テーブルを更新ここから
         question_num = int(request.POST['form-TOTAL_FORMS'])
-
         # 回答の文字数を取得
         # request_copy['char_num'] = len(request.POST['answer'])
         # request_copy['es_group_id'] = es_group_id
@@ -94,9 +97,14 @@ class ESCreateView(View):
         if question_formset.is_valid():
             for question_form in question_forms:
                 question_form.entry_sheet = es_record
+                print(type(question_form))
                 question_form.save()
+
+                # 回答テーブルを更新
+                # new_answer_record = AnswerModel(question=question_record)
             question_formset.save_m2m()
             print('saved post_form')
         else:
             print('failed save post_form')
+        # 質問テーブルここまで
         return redirect('esuits:es_edit', es_id=es_record.pk)
