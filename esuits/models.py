@@ -92,7 +92,7 @@ class QuestionModel(models.Model):
     entry_sheet = models.ForeignKey(
         EntrySheetesModel, on_delete=models.CASCADE, verbose_name='エントリーシート')
     question = models.TextField(verbose_name='質問')
-    answer = models.TextField(verbose_name='', blank=True, null=True)
+    answer = models.TextField(verbose_name='回答', blank=True, default='')
     tags = models.ManyToManyField(TagModel, verbose_name='タグ名', blank=True)
     char_num = models.IntegerField(default=0, blank=True)
     OPEN_INFO_CHOICES = [
@@ -104,7 +104,7 @@ class QuestionModel(models.Model):
     selected_version = models.IntegerField(verbose_name='表示するバージョン', default=1)
 
     def __str__(self):
-        return self.question
+        return str(self.pk) + '_' + self.question
 
 
 class AnswerModel(models.Model):
@@ -115,7 +115,8 @@ class AnswerModel(models.Model):
 
     question = models.ForeignKey(QuestionModel, verbose_name='質問', on_delete=models.CASCADE)
     version = models.IntegerField(verbose_name='バージョン', blank=True, default=1)
-    answer = models.TextField(verbose_name='回答', blank=True, null=True)
+    answer = models.TextField(verbose_name='回答', blank=True, default='')
+    char_num = models.IntegerField(verbose_name='文字数', default=0, blank=True)
 
     def __str__(self):
         return self.question.question + '_' + str(self.version)
