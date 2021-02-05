@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import fields
 from ..models import QuestionModel, EntrySheetesModel, AnswerModel
 
 
@@ -10,6 +9,7 @@ class AnswerQuestionForm(forms.ModelForm):
         fields = (
             'answer',
         )
+
 
 class AnswerForm(forms.ModelForm):
     class Meta:
