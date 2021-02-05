@@ -65,17 +65,15 @@ class ESCreateView(View):
 
         # ESを登録
         es_form = CreateEntrySheetForm(request_post_copy)
+        es_record = None
         if es_form.is_valid():
             es_record = es_form.save(commit=False)
             es_record.author = author
             es_record.is_editing = True
-            # form.save()では，作成されたレコードが返ってくる．
-            print(type(es_record))
-            print(es_record)
             es_record.save()
-            print(es_record)
             print('saved es_form')
         else:
+            # ESを登録できなかった場合のエラー処理を書かないといけない
             print('failed save es_form')
         # ESテーブル更新ここまで
 
@@ -95,13 +93,13 @@ class ESCreateView(View):
         question_forms = question_formset.save(commit=False)
 
         if question_formset.is_valid():
-            for question_form in question_forms:
-                question_form.entry_sheet = es_record
-                print(type(question_form))
-                question_form.save()
-
+            for question_record in question_forms:
+                question_record.entry_sheet = es_record
+                question_record.save()
                 # 回答テーブルを更新
-                # new_answer_record = AnswerModel(question=question_record)
+                new_answer_record = AnswerModel(question=question_record)
+                print(new_answer_record)
+                new_answer_record.save()
             question_formset.save_m2m()
             print('saved post_form')
         else:
