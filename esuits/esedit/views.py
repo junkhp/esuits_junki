@@ -7,7 +7,8 @@ from django.conf import settings
 from pprint import pprint
 
 from .forms import AnswerQuestionFormSet, AnswerQuestionForm
-from ..models import CustomUserModel, TagModel, QuestionModel, EntrySheetesModel, CompanyHomepageURLModel
+from ..models import (AnswerModel, CustomUserModel, TagModel, QuestionModel
+,EntrySheetesModel, CompanyHomepageURLModel)
 from ..esuits_utils.newsapi import newsapi
 from ..esuits_utils.wordcloudapi.get_wordcloud import get_wordcloud
 # Create your views here.
@@ -130,7 +131,16 @@ class EsEditView(View):
                     if formset.is_valid():
                         for form in forms:
                             form.char_num = self._get_char_num(form)
+
+                            # 更新する回答レコードを作成
+                            upd_answer_record = AnswerModel.objects.get(
+                                question=form, version=form.selected_version)
+                            upd_answer_record.answer = form.answer
+                            upd_answer_record.char_num = form.char_num
+
+                            # 更新
                             form.save()
+                            upd_answer_record.save()
                         formset.save()
                         return redirect('esuits:home')
 
