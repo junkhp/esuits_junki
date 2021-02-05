@@ -49,7 +49,7 @@
 
                     <div class="btn-wrapper">
                       <button type="button" class="charnum-count-button">文字数をカウント</button>
-                      <span class="charnum">{{ post.char_num}}</span>字
+                      <span class="charnum">{{ post.char_num }}</span>字
                       <button type="button" class="related-post-button">関連質問を表示</button>
                       <!-- <a href="{% url 'esuits:answer_history' post.pk %}" class="btn" tabindex="-1" role="button">履歴を確認</a> -->
                       <input type="submit" name="history" value="{{ post.pk }}">
@@ -146,7 +146,8 @@
 
     // 文字数表示
     $('.charnum-count-button').on('click', function () {
-      var charnum = $(this).parents('.post-list').find('.ques-textarea').children()[1].value.length;
+      // モデルの構成によって[2]の中のインデックスが変わる。良くない。
+      var charnum = $(this).parents('.post-list').find('.ques-textarea').children()[2].value.length;
       $(this).parents('.post-list').find('.charnum')[0].textContent = charnum;
     });
 
