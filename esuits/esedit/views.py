@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, DeleteView, UpdateView, edit
-from django import forms
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.http.response import JsonResponse
@@ -8,7 +7,8 @@ from django.conf import settings
 from pprint import pprint
 
 from .forms import AnswerQuestionFormSet, AnswerQuestionForm
-from ..models import CustomUserModel, TagModel, QuestionModel, EntrySheetesModel, CompanyHomepageURLModel
+from ..models import (AnswerModel, CustomUserModel, TagModel, QuestionModel
+,EntrySheetesModel, CompanyHomepageURLModel)
 from ..esuits_utils.newsapi import newsapi
 from ..esuits_utils.wordcloudapi.get_wordcloud import get_wordcloud
 # Create your views here.
@@ -112,59 +112,79 @@ class EsEditView(View):
         return render(request, template_name, context)
 
     def post(self, request, es_id):
+        save_message = 'save'
+        history_message = 'history'
         template_name = 'esuits/es_edit.html'
 
-        if EntrySheetesModel.objects.filter(pk=es_id).exists():
-            # ESの存在を確認
-            es_info = EntrySheetesModel.objects.get(pk=es_id)
+        # 押されたボタンが保存の場合
+        if save_message in request.POST:
+            if EntrySheetesModel.objects.filter(pk=es_id).exists():
+                # ESの存在を確認
+                es_info = EntrySheetesModel.objects.get(pk=es_id)
 
-            if (es_info.author == request.user):
-                # 指定されたESが存在し，それが自分のESの場合
-                post_set = QuestionModel.objects.filter(entry_sheet=es_id)
-                formset = AnswerQuestionFormSet(data=request.POST, instance=es_info)
-                forms_ = formset.save(commit=False)
-                
-                if formset.is_valid():
-                    for form in forms_:
-                        form.char_num = self._get_char_num(form)
-                        form.save()
-                    formset.save()
-                    return redirect('esuits:home')
+                if (es_info.author == request.user):
+                    # 指定されたESが存在し，それが自分のESの場合
+                    post_set = QuestionModel.objects.filter(entry_sheet=es_id)
+                    formset = AnswerQuestionFormSet(data=request.POST, instance=es_info)
+                    forms = formset.save(commit=False)
 
-                # 関連したポスト一覧
-                related_posts_list = self._get_related_posts_list(request, es_id)
+                    if formset.is_valid():
+                        for form in forms:
+                            form.char_num = self._get_char_num(form)
 
-                # ニュース関連
-                news_list = newsapi.get_news(es_info.company)
+                            # 更新する回答レコードを作成
+                            upd_answer_record = AnswerModel.objects.get(
+                                question=form, version=form.selected_version)
+                            upd_answer_record.answer = form.answer
+                            upd_answer_record.char_num = form.char_num
 
-                # 企業の情報(ワードクラウドなど)
-                company_info = self._get_company_info(request, es_id)
+                            # 更新
+                            form.save()
+                            upd_answer_record.save()
+                        formset.save()
+                        return redirect('esuits:home')
 
-                context = {
-                    'message': 'OK',
-                    'es_info': es_info,
-                    'formset_management_form': formset.management_form,
-                    'zipped_posts_info': zip(post_set, formset, related_posts_list),
-                    'news_list': news_list,
-                    'company_info': company_info,
-                }
-                return render(request, template_name, context)
+                    # 関連したポスト一覧
+                    related_posts_list = self._get_related_posts_list(request, es_id)
+
+                    # ニュース関連
+                    news_list = newsapi.get_news(es_info.company)
+
+                    # 企業の情報(ワードクラウドなど)
+                    company_info = self._get_company_info(request, es_id)
+
+                    context = {
+                        'message': 'OK',
+                        'es_info': es_info,
+                        'formset_management_form': formset.management_form,
+                        'zipped_posts_info': zip(post_set, formset, related_posts_list),
+                        'news_list': news_list,
+                        'company_info': company_info,
+                    }
+                    return render(request, template_name, context)
+                else:
+                    # 指定されたESが存在するが，それが違う人のESの場合
+                    context = {
+                        'message': '違う人のESなので表示できません',
+                        'es_info': {},
+                        'zipped_posts_info': (),
+                    }
+                    return render(request, template_name, context)
             else:
-                # 指定されたESが存在するが，それが違う人のESの場合
+                # 指定されたESが存在しない場合
                 context = {
-                    'message': '違う人のESなので表示できません',
+                    'message': '指定されたESは存在しません',
                     'es_info': {},
                     'zipped_posts_info': (),
                 }
                 return render(request, template_name, context)
+
+        # 履歴表示の場合
+        if history_message in request.POST:
+            question_id = int(request.POST[history_message])
+            return redirect('esuits:answer_history', question_id=question_id)
         else:
-            # 指定されたESが存在しない場合
-            context = {
-                'message': '指定されたESは存在しません',
-                'es_info': {},
-                'zipped_posts_info': (),
-            }
-            return render(request, template_name, context)
+            return redirect('esuits:home')
 
 
 def get_related_post(request):
