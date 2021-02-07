@@ -9,5 +9,6 @@ media
 local_settings.py
 
 venv/
+venv2/
 .vscode/
 .DS_Store
