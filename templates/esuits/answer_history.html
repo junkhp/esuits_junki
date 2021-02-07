@@ -1,15 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>{{ question.question }}</h1>
-    {% for ans in answer_history %}
-    <p>{{ ans.version }}</p>
-    <p>{{ ans.answer }}</p>
-    {% endfor %}
-</body>
-</html>
+{% extends 'esuits/base.html' %}
+
+{% load static %}
+
+{% block title %}
+履歴管理
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'esuits/css/esedit.css' %}">
+<!-- jQuery読み込み -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<main>
+    <div class="container pt-4">
+        <br><br><br>
+        <h1>{{ question.question }}</h1>
+        <form action="" method="POST">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" name="save" value="変更する">
+        </form>
+    </div>
+</main>
+{% endblock %}
