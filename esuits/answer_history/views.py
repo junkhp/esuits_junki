@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db.models.enums import Choices
+from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
@@ -10,6 +11,10 @@ from .forms import AnswerHistoryCheckForm
 
 class AnswerHistoryView(View):
     '''回答の履歴を表示・選択'''
+
+    # 回答の文字数を計算
+    def _get_char_num(self, question_form):
+        return len(question_form.answer)
 
     def orm_to_choice(self, orm):
         choices = []
@@ -50,10 +55,9 @@ class AnswerHistoryView(View):
         question_record = QuestionModel.objects.get(pk=question_id)
         selected_answer_record = AnswerModel.objects.get(
             question=question_record, version=selected_answer_version)
-        print('selected answer version')
-        print(type(selected_answer_version))
         question_record.selected_version = selected_answer_version
         question_record.answer = selected_answer_record.answer
+        question_record.char_num = selected_answer_record.char_num
         question_record.save()
         es_pk = question_record.entry_sheet.pk
         return redirect('esuits:es_edit', es_id=es_pk)

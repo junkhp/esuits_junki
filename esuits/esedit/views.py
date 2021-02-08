@@ -196,8 +196,6 @@ def get_related_post(request):
 
 
 def get_wordcloud_path(request):
-    print('get_wordcloud_pathを開始')
-    print(request.GET.get('es_group_id', ''))
     es_id = request.GET.get('es_group_id', '')
     es_info = EntrySheetesModel.objects.get(pk=es_id)
     company_url_info = CompanyHomepageURLModel.objects.get(homepage_url=es_info.homepage_url)
@@ -205,13 +203,11 @@ def get_wordcloud_path(request):
 
     # 現状デプロイ時にワードクラウドは使用しない
     if not settings.DEBUG:
-        print('本番環境')
         return JsonResponse({'image_path': '/static/esuits/images/kanban_jyunbi.png'})
 
     # 以下開発環境
     # CompanyHomepageURLModelにwordcloud_pathが存在している場合はその画像のパスを取り出す
     try:
-        print(company_url + ' already exists')
         wordcloud_path = CompanyHomepageURLModel\
             .objects.get(homepage_url=company_url).word_cloud_path
 
@@ -219,8 +215,7 @@ def get_wordcloud_path(request):
     except CompanyHomepageURLModel.DoesNotExist:
         try:
             wordcloud_path = get_wordcloud(company_url)[1:]
-            print(wordcloud_path)
-            # データベースに保存
+             # データベースに保存
 
             new_word_cloud = CompanyHomepageURLModel(company=es_info.company,
                     homepage_url=company_url, word_cloud_path=wordcloud_path)
