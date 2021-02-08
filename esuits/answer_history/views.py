@@ -29,16 +29,12 @@ class AnswerHistoryView(View):
         template = 'esuits/answer_history.html'
         question = QuestionModel.objects.get(pk=question_id)
         selected_version = question.selected_version
-        print(selected_version)
 
         # form
         form = AnswerHistoryCheckForm()
         history = AnswerModel.objects.filter(question__pk=question_id).order_by('version')
         choices = self.orm_to_choice(history)
-        print(choices)
         form.fields['select'].choices = choices
-        print('initial version')
-        print(selected_version)
         form.fields['select'].initial = [selected_version]
         context = {
             'username': login_user_name,
