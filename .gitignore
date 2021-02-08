@@ -11,5 +11,3 @@ local_settings.py
 venv/
 .vscode/
 .DS_Store
-
-Dockerfile
