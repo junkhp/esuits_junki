@@ -52,7 +52,7 @@
                       <span class="charnum">{{ post.char_num }}</span>字
                       <button type="button" class="related-post-button">関連質問を表示</button>
                       <!-- <a href="{% url 'esuits:answer_history' post.pk %}" class="btn" tabindex="-1" role="button">履歴を確認</a> -->
-                      <input type="submit" name="history" value="{{ post.pk }}">
+                      <input type="submit" name="question_pk" value="{{ post.pk }}">
                     </div>
                     <div class="related-post">
                       <div class="pagenation-x">
