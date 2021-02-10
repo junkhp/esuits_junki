@@ -17,28 +17,44 @@ class AnswerHistoryView(View):
     def _get_char_num(self, text):
         return len(text)
 
+    # ORMで取得した回答をchoicesに変換
     def orm_to_choice(self, orm):
         choices = []
         for answer in orm:
             choices.append((answer.version, answer.answer))
         return choices
 
+    # 回答が更新されているかを判定
+    def is_updated(self, new_answer_text, existing_text):
+        print(new_answer_text)
+        print(existing_text)
+        if new_answer_text == existing_text:
+            return False
+        else:
+            return True
+
     def get(self, request, question_id):
         login_user = request.user
         login_user_name = login_user.username
         # テンプレート
         template = 'esuits/answer_history.html'
+        # 質問
         question = QuestionModel.objects.get(pk=question_id)
-        selected_version = question.selected_version
 
-        # form
-        form = AnswerHistoryCheckForm()
+        selected_version = question.selected_version
         history = AnswerModel.objects.filter(question__pk=question_id).order_by('version')
-        new_version = len(history) + 1
-        print(question_id)
+        
+        # 選択肢を作成
+        choices = self.orm_to_choice(history)
         new_answer_text = request.session[str(question_id)]
-        new_answer_choice = (new_version, new_answer_text)
-        choices = [new_answer_choice] + self.orm_to_choice(history)
+        # 更新があるかどうか
+        if self.is_updated(new_answer_text, history[selected_version - 1].answer):
+            print('更新あり')
+            new_version = len(history) + 1
+            new_answer_choice = (new_version, new_answer_text)
+            choices = [new_answer_choice] + choices
+
+        form = AnswerHistoryCheckForm()
         form.fields['select'].choices = choices
         form.fields['select'].initial = [selected_version]
         context = {
