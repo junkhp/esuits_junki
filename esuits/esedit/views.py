@@ -71,6 +71,23 @@ class EsEditView(View):
                 post_set = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
                 formset = AnswerQuestionFormSet(instance=es_info)
 
+                # 編集→履歴→編集の場合
+                if 'question_num' in request.session:
+                    print('履歴処理')
+                    questions = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
+                    question_num = request.session['question_num']
+                    del request.session['question_num']
+                    del request.session['old_post']
+                    for question in questions:
+                        key = question.pk
+                        if key in request.session:
+                            del request.session[key]
+                print('回答')
+                print(type(formset[0]['answer']))
+                for x in formset[0]['answer']:
+                    print(x)
+                # print(formset[0]['answer'][0])
+
                 # 関連したポスト一覧
                 related_posts_list = self._get_related_posts_list(request, es_id)
                 # ニュース関連
@@ -115,7 +132,6 @@ class EsEditView(View):
         save_message = 'save'
         question_pk_message = 'question_pk'
         template_name = 'esuits/es_edit.html'
-        print(request.POST)
         # 押されたボタンが保存の場合
         if save_message in request.POST:
             if EntrySheetesModel.objects.filter(pk=es_id).exists():
@@ -181,6 +197,17 @@ class EsEditView(View):
 
         # 履歴表示の場合
         if question_pk_message in request.POST:
+            request.session['old_post'] = request.POST
+            # リクエストから現状の回答を取り出してセッションに保存
+            question_num = int(request.POST['questionmodel_set-TOTAL_FORMS'])
+            request.session['question_num'] = question_num
+            answers_dict = {}
+            for i in range(question_num):
+                question_key = 'questionmodel_set-{}-id'.format(i)
+                answer_key = 'questionmodel_set-{}-answer'.format(i)
+                answers_dict[request.POST[question_key]] = request.POST[answer_key]
+                request.session[request.POST[question_key]] = request.POST[answer_key]
+            # 履歴管理画面に遷移
             question_id = int(request.POST[question_pk_message])
             return redirect('esuits:answer_history', question_id=question_id)
         else:
