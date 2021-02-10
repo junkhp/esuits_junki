@@ -12,3 +12,5 @@ venv/
 venv2/
 .vscode/
 .DS_Store
+Dockerfile
+entrypoint.sh
