@@ -113,9 +113,9 @@ class EsEditView(View):
 
     def post(self, request, es_id):
         save_message = 'save'
-        history_message = 'history'
+        question_pk_message = 'question_pk'
         template_name = 'esuits/es_edit.html'
-
+        print(request.POST)
         # 押されたボタンが保存の場合
         if save_message in request.POST:
             if EntrySheetesModel.objects.filter(pk=es_id).exists():
@@ -180,8 +180,8 @@ class EsEditView(View):
                 return render(request, template_name, context)
 
         # 履歴表示の場合
-        if history_message in request.POST:
-            question_id = int(request.POST[history_message])
+        if question_pk_message in request.POST:
+            question_id = int(request.POST[question_pk_message])
             return redirect('esuits:answer_history', question_id=question_id)
         else:
             return redirect('esuits:home')
