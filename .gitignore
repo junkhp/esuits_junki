@@ -14,3 +14,6 @@ venv2/
 .DS_Store
 Dockerfile
 entrypoint.sh
+Dockerfile.prod
+entrypoint.prod.sh
+
