@@ -70,7 +70,7 @@ class EntrySheetesModel(models.Model):
         on_delete=models.CASCADE, null=True, blank=True)
     selection_type = models.CharField(verbose_name='選考種別', max_length=50, blank=True, null=True)
     author = models.ForeignKey(CustomUserModel, verbose_name='作成者', on_delete=models.CASCADE)
-    is_editing = models.BooleanField(verbose_name='作成中or完成', default=True)
+    is_editing = models.BooleanField(verbose_name='編集中', default=True)
     created_date = models.DateTimeField(verbose_name='作成日時', default=timezone.now)
     deadline_date = models.DateTimeField(
         verbose_name='提出期限', default=timezone.now, blank=True, null=True)
@@ -119,4 +119,4 @@ class AnswerModel(models.Model):
     char_num = models.IntegerField(verbose_name='文字数', default=0, blank=True)
 
     def __str__(self):
-        return str(self.pk) + '_' + self.question.question + '_' + str(self.version)
+        return str(self.pk) + '_' + '_' + str(self.question.pk) + self.question.question + '_' + str(self.version)
