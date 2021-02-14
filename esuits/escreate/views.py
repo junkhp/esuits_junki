@@ -23,10 +23,11 @@ class ESCreateView(View):
             form=CreateQuestionForm,
             extra=1,
         )
+        question_formset = QuestionFormset(form_kwargs={'user': request.user})
         context = {
             'es_form': CreateEntrySheetForm(),
             # 'post_form': CreatePostForm(),
-            'question_formset': QuestionFormset(form_kwargs={'user': request.user}),
+            'question_formset': question_formset,
             'tags': tags,
             'num_tags': num_tags,
             'user_id': login_user_id,
