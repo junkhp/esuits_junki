@@ -1,18 +1,20 @@
+from django.db.models.query import QuerySet
+from django.forms.formsets import formset_factory
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView, DeleteView, UpdateView, edit
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.http.response import JsonResponse
 from django.conf import settings
+from django import forms
 from pprint import pprint
 
-from .forms import AnswerQuestionFormSet, AnswerQuestionForm
+from .forms import AnswerUpdateFormSet
 from ..models import (AnswerModel, CustomUserModel, TagModel, QuestionModel
 ,EntrySheetesModel, CompanyHomepageURLModel)
 from ..esuits_utils.newsapi import newsapi
 from ..esuits_utils.wordcloudapi.get_wordcloud import get_wordcloud
 # Create your views here.
-
+QuerySet
 
 class EsEditView(View):
     '''
@@ -57,8 +59,18 @@ class EsEditView(View):
         return company_info
 
     # 回答の文字数を計算
-    def _get_char_num(self, question_form):
-        return len(question_form.answer)
+    def _get_char_num(self, answer_text):
+        return len(answer_text)
+
+    def _get_queryset_for_answer_update_formset(self, es_pk, questions):
+        form_num = len(questions)
+        all_answers = AnswerModel.objects.filter(question__in=questions)
+        initial = []
+        for question in questions:
+            version = question.selected_version
+            answer_record = all_answers.get(question=question, version=version)
+            initial.append(answer_record.pk)
+        return AnswerModel.objects.filter(pk__in=initial).order_by('question__pk')
     
     def get(self, request, es_id):
         template_name = 'esuits/es_edit.html'
@@ -69,23 +81,25 @@ class EsEditView(View):
             if (es_info.author == request.user):
                 # 指定されたESが存在し，それが自分のESの場合
                 post_set = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
-                formset = AnswerQuestionFormSet(instance=es_info)
+                query_set = self._get_queryset_for_answer_update_formset(es_id, post_set)
+                formset = AnswerUpdateFormSet(
+                    queryset=query_set,
+                )
+                # print(formset)
+                # formset = AnswerQuestionFormSet(instance=es_info)
+                # print(formset)
 
                 # 編集→履歴→編集の場合
-                if 'question_num' in request.session:
-                    print('履歴処理')
-                    questions = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
-                    question_num = request.session['question_num']
-                    del request.session['question_num']
-                    del request.session['old_post']
-                    for question in questions:
-                        key = question.pk
-                        if key in request.session:
-                            del request.session[key]
-                print('回答')
-                print(type(formset[0]['answer']))
-                for x in formset[0]['answer']:
-                    print(x)
+                # if 'question_num' in request.session:
+                #     print('履歴処理')
+                #     questions = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
+                #     question_num = request.session['question_num']
+                #     del request.session['question_num']
+                #     del request.session['old_post']
+                #     for question in questions:
+                #         key = question.pk
+                #         if key in request.session:
+                #             del request.session[key]
                 # print(formset[0]['answer'][0])
 
                 # 関連したポスト一覧
@@ -140,23 +154,30 @@ class EsEditView(View):
 
                 if (es_info.author == request.user):
                     # 指定されたESが存在し，それが自分のESの場合
-                    post_set = QuestionModel.objects.filter(entry_sheet=es_id)
-                    formset = AnswerQuestionFormSet(data=request.POST, instance=es_info)
+                    questions = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
+                    query_set = self._get_queryset_for_answer_update_formset(es_id, questions)
+                    formset = AnswerUpdateFormSet(
+                        request.POST, queryset=query_set)
+                    # formset = AnswerQuestionFormSet(data=request.POST, instance=es_info)
                     forms = formset.save(commit=False)
-
+                    # print(forms)
+                    # return redirect('esuits:home')
                     if formset.is_valid():
-                        for form in forms:
-                            form.char_num = self._get_char_num(form)
+                        for question, form in zip(questions, forms):
+                            print(form.version)
+                            form.char_num = self._get_char_num(form.answer)
+                            
+                            # form.char_num = self._get_char_num(form)
 
                             # 更新する回答レコードを作成
-                            upd_answer_record = AnswerModel.objects.get(
-                                question=form, version=form.selected_version)
-                            upd_answer_record.answer = form.answer
-                            upd_answer_record.char_num = form.char_num
+                            # upd_answer_record = AnswerModel.objects.get(
+                            #     question=form, version=form.selected_version)
+                            # upd_answer_record.answer = form.answer
+                            # upd_answer_record.char_num = form.char_num
 
                             # 更新
                             form.save()
-                            upd_answer_record.save()
+                            # upd_answer_record.save()
                         formset.save()
                         return redirect('esuits:home')
 
@@ -173,7 +194,7 @@ class EsEditView(View):
                         'message': 'OK',
                         'es_info': es_info,
                         'formset_management_form': formset.management_form,
-                        'zipped_posts_info': zip(post_set, formset, related_posts_list),
+                        'zipped_posts_info': zip(questions, formset, related_posts_list),
                         'news_list': news_list,
                         'company_info': company_info,
                     }
@@ -197,16 +218,16 @@ class EsEditView(View):
 
         # 履歴表示の場合
         if question_pk_message in request.POST:
-            request.session['old_post'] = request.POST
-            # リクエストから現状の回答を取り出してセッションに保存
-            question_num = int(request.POST['questionmodel_set-TOTAL_FORMS'])
-            request.session['question_num'] = question_num
-            answers_dict = {}
-            for i in range(question_num):
-                question_key = 'questionmodel_set-{}-id'.format(i)
-                answer_key = 'questionmodel_set-{}-answer'.format(i)
-                answers_dict[request.POST[question_key]] = request.POST[answer_key]
-                request.session[request.POST[question_key]] = request.POST[answer_key]
+            # request.session['old_post'] = request.POST
+            # # リクエストから現状の回答を取り出してセッションに保存
+            # question_num = int(request.POST['questionmodel_set-TOTAL_FORMS'])
+            # request.session['question_num'] = question_num
+            # answers_dict = {}
+            # for i in range(question_num):
+            #     question_key = 'questionmodel_set-{}-id'.format(i)
+            #     answer_key = 'questionmodel_set-{}-answer'.format(i)
+            #     answers_dict[request.POST[question_key]] = request.POST[answer_key]
+            #     request.session[request.POST[question_key]] = request.POST[answer_key]
             # 履歴管理画面に遷移
             question_id = int(request.POST[question_pk_message])
             return redirect('esuits:answer_history', question_id=question_id)
