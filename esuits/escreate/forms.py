@@ -22,7 +22,7 @@ class CreateQuestionForm(forms.ModelForm):
         model = QuestionModel
         fields = (
             'question',
-            'answer',
+            # 'answer',
             'tags',
             'is_open',
         )
