@@ -12,7 +12,6 @@ from .forms import AnswerHistoryCheckForm
 
 class AnswerHistoryView(View):
     '''回答の履歴を表示・選択'''
-
     # 回答の文字数を計算
     def _get_char_num(self, text):
         return len(text)
@@ -33,7 +32,12 @@ class AnswerHistoryView(View):
         else:
             return True
 
+    def get_new_answer_text(self, post_information):
+        question_pk = post_information['question_pk']
+        return post_information[question_pk]
+
     def get(self, request, question_id):
+        print(request.session['post_information'])
         login_user = request.user
         login_user_name = login_user.username
         # テンプレート
@@ -42,15 +46,15 @@ class AnswerHistoryView(View):
         question = QuestionModel.objects.get(pk=question_id)
 
         selected_version = question.selected_version
-        history = AnswerModel.objects.filter(question__pk=question_id).order_by('version')
+        answers = AnswerModel.objects.filter(question__pk=question_id).order_by('version')
         
         # 選択肢を作成
-        choices = self.orm_to_choice(history)
-        new_answer_text = request.session[str(question_id)]
+        choices = self.orm_to_choice(answers)
+        new_answer_text = self.get_new_answer_text(request.session['post_information'])
         # 更新があるかどうか
-        if self.is_updated(new_answer_text, history[selected_version - 1].answer):
+        if self.is_updated(new_answer_text, answers[selected_version - 1].answer):
             print('更新あり')
-            new_version = len(history) + 1
+            new_version = len(answers) + 1
             new_answer_choice = (new_version, new_answer_text)
             choices = [new_answer_choice] + choices
 
@@ -66,7 +70,6 @@ class AnswerHistoryView(View):
 
     def post(self, request, question_id):
         template_name = 'esuits/es_edit.html'
-        print(request.POST)
         # 質問テーブルを更新
         selected_answer_version = int(request.POST['select'])
         question_record = QuestionModel.objects.get(pk=question_id)
@@ -84,8 +87,6 @@ class AnswerHistoryView(View):
             selected_answer_record.save()
 
         question_record.selected_version = selected_answer_version
-        question_record.answer = selected_answer_record.answer
-        question_record.char_num = selected_answer_record.char_num
         question_record.save()
         es_pk = question_record.entry_sheet.pk
         return redirect('esuits:es_edit', es_id=es_pk)

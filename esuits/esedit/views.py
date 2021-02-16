@@ -71,7 +71,20 @@ class EsEditView(View):
             answer_record = all_answers.get(question=question, version=version)
             initial.append(answer_record.pk)
         return AnswerModel.objects.filter(pk__in=initial).order_by('question__pk')
-    
+
+    def _make_post_information(self, request_post, questions):
+        post_information_dict = {}
+        question_num = int(request_post['form-TOTAL_FORMS'])
+        question_pk = request_post['question_pk']
+        post_information_dict['question_num'] = question_num
+        post_information_dict['question_pk'] = question_pk
+        for i, question in enumerate(questions):
+            # answer_pk = int(request_post['form-{}-id'.format(i)])
+            answer_text = request_post['form-{}-answer'.format(i)]
+            post_information_dict[str(question.pk)] = answer_text
+        print('post information')
+        print(post_information_dict)
+        return post_information_dict
     def get(self, request, es_id):
         template_name = 'esuits/es_edit.html'
         if EntrySheetesModel.objects.filter(pk=es_id).exists():
@@ -82,25 +95,35 @@ class EsEditView(View):
                 # 指定されたESが存在し，それが自分のESの場合
                 post_set = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
                 query_set = self._get_queryset_for_answer_update_formset(es_id, post_set)
+                query_set[0].answer = 'aaa'
+                print(query_set[0].answer)
                 formset = AnswerUpdateFormSet(
                     queryset=query_set,
                 )
                 # print(formset)
-                # formset = AnswerQuestionFormSet(instance=es_info)
+                print(formset[0]['answer'])
+                print(type(formset[0]['answer']))
+                # formset = AnswerQuestionFormSet(instance=es_info)f
                 # print(formset)
-
+                print(formset[0]['answer'])
+                test = formset.save(commit=False)
+                print(type(test))
+                print(test)
+                for form in test:
+                    form.answer = 'aaa'
+                print(test[0].answer)
+                print(formset[0]['answer'])
                 # 編集→履歴→編集の場合
-                # if 'question_num' in request.session:
-                #     print('履歴処理')
-                #     questions = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
-                #     question_num = request.session['question_num']
-                #     del request.session['question_num']
-                #     del request.session['old_post']
-                #     for question in questions:
-                #         key = question.pk
-                #         if key in request.session:
-                #             del request.session[key]
-                # print(formset[0]['answer'][0])
+                post_information_key = 'post_information'
+                if post_information_key in request.session:
+                    print('履歴処理')
+                    post_information = request.session[post_information_key]
+                    del request.session[post_information_key]
+                    questions = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
+                    # for question in questions:
+                    #     key = question.pk
+                    #     if key in request.session:
+                    #         del request.session[key]
 
                 # 関連したポスト一覧
                 related_posts_list = self._get_related_posts_list(request, es_id)
@@ -218,8 +241,13 @@ class EsEditView(View):
 
         # 履歴表示の場合
         if question_pk_message in request.POST:
-            # request.session['old_post'] = request.POST
-            # # リクエストから現状の回答を取り出してセッションに保存
+            print(request.POST)
+            questions = QuestionModel.objects.filter(entry_sheet__pk=es_id).order_by('pk')
+            print('questions')
+            print(questions)
+            question_id = int(request.POST[question_pk_message])
+            # リクエストから現状の回答を取り出してセッションに保存
+            request.session['post_information'] = self._make_post_information(request.POST, questions)
             # question_num = int(request.POST['questionmodel_set-TOTAL_FORMS'])
             # request.session['question_num'] = question_num
             # answers_dict = {}
@@ -229,7 +257,6 @@ class EsEditView(View):
             #     answers_dict[request.POST[question_key]] = request.POST[answer_key]
             #     request.session[request.POST[question_key]] = request.POST[answer_key]
             # 履歴管理画面に遷移
-            question_id = int(request.POST[question_pk_message])
             return redirect('esuits:answer_history', question_id=question_id)
         else:
             return redirect('esuits:home')
