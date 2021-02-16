@@ -40,7 +40,7 @@
                 {{ message }}
                 {% endif %}
                 <ul>
-                  {% for post, form, related_posts in zipped_posts_info %}
+                  {% for post, form, char_num, related_posts in zipped_posts_info %}
                   <div class="post-list my-4">
                     <li class="ques-textarea">
                       <h3>{{ post.question }}</h3>
@@ -49,7 +49,7 @@
 
                     <div class="btn-wrapper">
                       <button type="button" class="charnum-count-button">文字数をカウント</button>
-                      <span class="charnum">{{ post.char_num }}</span>字
+                      <span class="charnum">{{ char_num }}</span>字
                       <button type="button" class="related-post-button">関連質問を表示</button>
                       <!-- <a href="{% url 'esuits:answer_history' post.pk %}" class="btn" tabindex="-1" role="button">履歴を確認</a> -->
                       <input type="submit" name="question_pk" value="{{ post.pk }}">

@@ -119,4 +119,4 @@ class AnswerModel(models.Model):
     char_num = models.IntegerField(verbose_name='文字数', default=0, blank=True)
 
     def __str__(self):
-        return str(self.pk) + '_' + '_' + str(self.question.pk) + self.question.question + '_' + str(self.version)
+        return str(self.pk) + '_' + str(self.question.pk) + '_' + self.question.question + '_' + str(self.version)
