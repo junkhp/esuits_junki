@@ -34,7 +34,7 @@ class AnswerHistoryView(View):
 
     def get_new_answer_text(self, post_information):
         question_pk = post_information['question_pk']
-        return post_information[question_pk]
+        return post_information[str(question_pk)]
 
     def get(self, request, question_id):
         print(request.session['post_information'])
@@ -77,7 +77,7 @@ class AnswerHistoryView(View):
             selected_answer_record = AnswerModel.objects.get(
                 question=question_record, version=selected_answer_version)
         except:
-            new_answer_text = request.session[str(question_id)]
+            new_answer_text = self.get_new_answer_text(request.session['post_information'])
             selected_answer_record = AnswerModel(
                 question=question_record,
                 version=selected_answer_version,
