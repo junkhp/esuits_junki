@@ -58,40 +58,35 @@ class EsEditView(View):
             company_info = {"wordcloud_path": wordcloud_path}
         return company_info
 
-    # 回答の文字数を計算
+    # 回答の文字数を計算(いらないかも)
     def _get_char_num(self, answer_text):
         return len(answer_text)
 
-    # def _get_queryset_for_answer_update_formset(self, questions):
-    #     form_num = len(questions)
-    #     all_answers = AnswerModel.objects.filter(question__in=questions)
-    #     initial = []
-    #     for question in questions:
-    #         version = question.selected_version
-    #         answer_record = all_answers.get(question=question, version=version)
-    #         initial.append(answer_record.pk)
-    #     return AnswerModel.objects.filter(pk__in=initial).order_by('question__pk')
-
+    # sessionに詰めるための辞書型の情報を作成
     def _make_post_information(self, request_post, questions):
+        '''
+        作成する辞書は下記の通り
+        {
+            question_num: 質問数
+            question_pk: 履歴管理をする質問のPK
+            n番目の質問のPK: n番目の質問に対する回答
+        }
+        '''
         post_information_dict = {}
         question_num = int(request_post['form-TOTAL_FORMS'])
         question_pk = int(request_post['question_pk'])
         post_information_dict['question_num'] = question_num
         post_information_dict['question_pk'] = question_pk
         for i, question in enumerate(questions):
-            # answer_pk = int(request_post['form-{}-id'.format(i)])
             answer_text = request_post['form-{}-answer'.format(i)]
-            print('questio type')
-            print(type(question.pk))
             post_information_dict[question.pk] = answer_text
-        print(post_information_dict)
         return post_information_dict
 
+    # formsetの初期値のための辞書をリストに変換
     def _convert_initial_dict_to_list(self, initial_dict):
         '''
         initialは辞書のリスト
         '''
-        print(initial_dict)
         question_pk_key = 'question_pk'
         answer_key = 'answer'
         initial_list = []
@@ -100,9 +95,9 @@ class EsEditView(View):
                 question_pk_key: question_pk,
                 answer_key: answer_and_char_num,
                 })
-        print(initial_list)
         return initial_list
 
+    # formsetの初期値のための辞書を作成、回答の文字数のリストも作成
     def _make_initial_dict(self, questions):
         initial = {}
         char_num_list = []
@@ -124,10 +119,10 @@ class EsEditView(View):
                 # 指定されたESが存在し，それが自分のESの場合
                 questions = QuestionModel.objects.filter(entry_sheet=es_id).order_by('pk')
                 formset_initial_dict, char_num_list = self._make_initial_dict(questions)
+
                 # 編集→履歴→編集の場合
                 post_information_key = 'post_information'
                 if post_information_key in request.session:
-                    print('履歴処理')
                     post_information = request.session[post_information_key]
                     del request.session[post_information_key]
                     for i, question in enumerate(questions):
@@ -259,10 +254,8 @@ class EsEditView(View):
 
 
 def get_related_post(request):
-    print(request.GET.get('pk', ''))
     pk = request.GET.get('pk', '')
     es = QuestionModel.objects.get(pk=pk)
-    print(es.question, es.answer, sep='¥n')
     return JsonResponse({'question': es.question, 'answer': es.answer})
 
 
@@ -291,9 +284,7 @@ def get_wordcloud_path(request):
             new_word_cloud = CompanyHomepageURLModel(company=es_info.company,
                     homepage_url=company_url, word_cloud_path=wordcloud_path)
             new_word_cloud.save()
-            print('created new word cloud')
         except:
-            print('error from word_cloud')
             return JsonResponse({'image_path': '/static/esuits/images/wordcloud_failed.png'})
 
     # return JsonResponse({'image_path': wordcloud_path})
