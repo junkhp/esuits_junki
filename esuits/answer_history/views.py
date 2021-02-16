@@ -37,7 +37,6 @@ class AnswerHistoryView(View):
         return post_information[str(question_pk)]
 
     def get(self, request, question_id):
-        print(request.session['post_information'])
         login_user = request.user
         login_user_name = login_user.username
         # テンプレート
