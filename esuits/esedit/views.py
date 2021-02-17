@@ -264,9 +264,10 @@ class EsEditView(View):
 
 
 def get_related_post(request):
-    pk = request.GET.get('pk', '')
-    es = QuestionModel.objects.get(pk=pk)
-    return JsonResponse({'question': es.question, 'answer': es.answer})
+    question_pk = request.GET.get('pk', '')
+    question = QuestionModel.objects.get(pk=question_pk)
+    answer = AnswerModel.objects.get(question=question, version=question.selected_version)
+    return JsonResponse({'question': question.question, 'answer': answer.answer})
 
 
 def get_wordcloud_path(request):
