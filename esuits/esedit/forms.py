@@ -24,7 +24,7 @@ from ..models import QuestionModel, EntrySheetesModel, AnswerModel
 
 class AnswerForm(forms.Form):
     question_pk = forms.IntegerField(widget=forms.HiddenInput)
-    answer = forms.CharField(widget=forms.Textarea)
+    answer = forms.CharField(widget=forms.Textarea, required=False)
 
 
 AnswerFormSet = forms.formset_factory(

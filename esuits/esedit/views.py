@@ -109,6 +109,15 @@ class EsEditView(View):
             char_num_list.append(answer_record.char_num)
         return initial, char_num_list
 
+    def _get_char_num_list(self, questions):
+        char_num_list = []
+        all_answers = AnswerModel.objects.filter(question__in=questions)
+        for question in questions:
+            char_num_list.append(
+                all_answers.get(question=question, version=question.selected_version).char_num
+            )
+        return char_num_list
+
     def get(self, request, es_id):
         template_name = 'esuits/es_edit.html'
         if EntrySheetesModel.objects.filter(pk=es_id).exists():
@@ -191,7 +200,6 @@ class EsEditView(View):
                     formset = AnswerFormSet(request.POST)
                     if formset.is_valid():
                         for form in formset:
-                            # form.char_num = self._get_char_num(form.answer)
                             question = questions.get(pk=form.cleaned_data['question_pk'])
                             # 更新する回答レコードを作成
                             upd_answer_record = AnswerModel.objects.get(
@@ -202,21 +210,23 @@ class EsEditView(View):
 
                             upd_answer_record.save()
                         return redirect('esuits:home')
-
+                
+                    # formsetのvalidationがFalseのとき
                     # 関連したポスト一覧
                     related_posts_list = self._get_related_posts_list(request, es_id)
-
                     # ニュース関連
                     news_list = newsapi.get_news(es_info.company)
-
                     # 企業の情報(ワードクラウドなど)
                     company_info = self._get_company_info(request, es_id)
+                    # 文字数を取得
+                    char_num_list = self._get_char_num_list(questions)
 
                     context = {
                         'message': 'OK',
                         'es_info': es_info,
                         'formset_management_form': formset.management_form,
-                        'zipped_posts_info': zip(questions, formset, related_posts_list),
+                        'zipped_posts_info': zip(
+                            questions, formset, char_num_list, related_posts_list),
                         'news_list': news_list,
                         'company_info': company_info,
                     }
