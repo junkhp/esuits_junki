@@ -92,9 +92,7 @@ class QuestionModel(models.Model):
     entry_sheet = models.ForeignKey(
         EntrySheetesModel, on_delete=models.CASCADE, verbose_name='エントリーシート')
     question = models.TextField(verbose_name='質問')
-    answer = models.TextField(verbose_name='回答', blank=True, default='')
     tags = models.ManyToManyField(TagModel, verbose_name='タグ名', blank=True)
-    char_num = models.IntegerField(default=0, blank=True)
     OPEN_INFO_CHOICES = [
         ('public', '公開'),
         ('private', '非公開')
