@@ -272,9 +272,9 @@ def get_related_post(request):
 
 def get_wordcloud_path(request):
     es_id = request.GET.get('es_group_id', '')
-    es_info = EntrySheetesModel.objects.get(pk=es_id)
-    company_url_info = CompanyHomepageURLModel.objects.get(homepage_url=es_info.homepage_url)
-    company_url = company_url_info.homepage_url
+    es_record = EntrySheetesModel.objects.get(pk=es_id)
+    company_url_record = CompanyHomepageURLModel.objects.get(pk=es_record.homepage_url.pk)
+    company_url = company_url_record.homepage_url
 
     # 現状デプロイ時にワードクラウドは使用しない
     if not settings.DEBUG:
@@ -292,7 +292,7 @@ def get_wordcloud_path(request):
             wordcloud_path = get_wordcloud(company_url)[1:]
              # データベースに保存
 
-            new_word_cloud = CompanyHomepageURLModel(company=es_info.company,
+            new_word_cloud = CompanyHomepageURLModel(company=es_record.company,
                     homepage_url=company_url, word_cloud_path=wordcloud_path)
             new_word_cloud.save()
         except:

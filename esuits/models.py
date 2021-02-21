@@ -54,7 +54,7 @@ class CompanyHomepageURLModel(models.Model):
                                         , null=True, blank=True)
 
     def __str__(self):
-        return self.homepage_url
+        return self.company.company_name + '_' + self.homepage_url
 
 
 class EntrySheetesModel(models.Model):
