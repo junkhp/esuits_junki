@@ -1,11 +1,26 @@
-# [ESUITS](https://github.com/jphacks/D_2014)のデータベースを設計し直してアプリケーションを修正
-以前ハッカソンで作成したエントリシート作成支援アプリケーションを作成したが，時間もなくデータベースの設計が割と適当だったのであらためて設計し直して適用．
+# JPHACKS(ハッカソン)で開発した[ESUITS](https://github.com/jphacks/D_2014)を個人で追加開発
+- ハッカソン開発時のリポジトリは[こちら](https://github.com/jphacks/D_2014)
+- ESUITSデプロイ先 → https://esuits.herokuapp.com/
+## ハッカソンで自身が担当したところ
+- Djangoを使用したアプリケーションの枠組み作成
+- Herokuにデプロイ
 
-ESUITSデプロイ先 →
-https://esuits.herokuapp.com/
+## ハッカソン後に個人で取り組んだこと
+### 取り組んだこと一覧
+- データーベースの再設計とそれに伴うアプリケーションの修正
+- 不具合の修正
+- 新規機能の実装
+    - 文字数カウント [#9](https://github.com/junkhp/esuiets_junki/issues/9)
+    - 履歴機能 [#11](https://github.com/junkhp/esuiets_junki/issues/11)
 
- # モデルの再設計
- ![データベースER図](https://github.com/junkhp/esuits_db_check/blob/main/esuits_db_er.png "ESUITSのデータベースのER図")
+## データベースの再設計とアプリケーションの修正
+ハッカソンでは時間がなくデータベースの設計が割と適当だったのであらためて設計し直して適用．
+
+### データベースの再設計
+変更前
+![](./images/before.jpg)
+変更後
+ ![データベースER図](./images/esuits_db_history_er.png "ESUITSのデータベースのER図")
 
 ポイント
 - ユーザーとタグを多対多にした．(以前は一対多)
@@ -41,17 +56,3 @@ https://esuits.herokuapp.com/
 1. 5.で作成したエントリーシートのレコードに紐付けて，質問を質問テーブルに保存
 
  ![エントリーシート新規作成](es_registry.png "エントリーシート登録画面")
-
- # 不具合
-- 異なる企業で同一のURLを使用すると編集画面に遷移するときにエラー
-    * 一つのURLに対して紐づく企業は1社なので，2社目以降はURLがないことになる．
-
-- herokuでメモリ(ROM)が足りない
-```bash
-Process running mem=802M(156.8%)
-```
-
-# (new)質問テーブルから回答を切りだし
-詳細は[#11](https://github.com/junkhp/esuiets_junki/issues/11)
- ![データベースER図](./esuits_db_history_er.png "ESUITSのデータベースのER図")
- 
