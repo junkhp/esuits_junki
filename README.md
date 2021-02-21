@@ -12,7 +12,8 @@
 - 新規機能の実装
     - 文字数カウント [#9](https://github.com/junkhp/esuiets_junki/issues/9)
     - 履歴機能 [#11](https://github.com/junkhp/esuiets_junki/issues/11)
-
+- Docker環境構築とAWSにデプロイ(現在取り組んでいること)
+https://github.com/junkhp/esuits_docker
 ## データベースの再設計とアプリケーションの修正
 ハッカソンでは時間がなくデータベースの設計が割と適当だったのであらためて設計し直して適用．
 
