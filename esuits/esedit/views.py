@@ -271,39 +271,41 @@ def get_related_post(request):
 
 
 def get_wordcloud_path(request):
+    image_path_key = 'image_path'
+    failed_image_path = '/static/esuits/images/wordcloud_failed.png'
+    preparing_image_path = '/static/esuits/images/kanban_jyunbi.png'
     es_id = request.GET.get('es_group_id', '')
     es_record = EntrySheetesModel.objects.get(pk=es_id)
     company_url_record = CompanyHomepageURLModel.objects.get(pk=es_record.homepage_url.pk)
-    company_url = company_url_record.homepage_url
+    homepage_url = company_url_record.homepage_url
 
     # 現状デプロイ時にワードクラウドは使用しない
     if not settings.DEBUG:
-        return JsonResponse({'image_path': '/static/esuits/images/kanban_jyunbi.png'})
+        return JsonResponse({image_path_key: preparing_image_path})
 
     # 以下開発環境
     # CompanyHomepageURLModelにwordcloud_pathが存在している場合はその画像のパスを取り出す
     try:
-        wordcloud_path = CompanyHomepageURLModel\
-            .objects.get(homepage_url=company_url).word_cloud_path
+        word_cloud_path = CompanyHomepageURLModel.objects.get(homepage_url=homepage_url).word_cloud_path
 
     # 存在しない場合は新しくワードクラウドを作成
-    except CompanyHomepageURLModel.DoesNotExist:
+    except:
+        print('存在しないURL')
         try:
-            wordcloud_path = get_wordcloud(company_url)[1:]
+            word_cloud_path = get_wordcloud(homepage_url)[1:]
              # データベースに保存
 
             new_word_cloud = CompanyHomepageURLModel(company=es_record.company,
-                    homepage_url=company_url, word_cloud_path=wordcloud_path)
+                    homepage_url=homepage_url, word_cloud_path=word_cloud_path)
             new_word_cloud.save()
         except:
-            return JsonResponse({'image_path': '/static/esuits/images/wordcloud_failed.png'})
+            return JsonResponse({image_path_key: failed_image_path})
 
-    # return JsonResponse({'image_path': wordcloud_path})
-    homepage_url_record = CompanyHomepageURLModel.objects.get(homepage_url=company_url)
-    wordcloud_path = homepage_url_record.word_cloud_path
-    if wordcloud_path is None or wordcloud_path == 'dummy_path':
-        wordcloud_path = get_wordcloud(company_url)[1:]
+    homepage_url_record = CompanyHomepageURLModel.objects.get(homepage_url=homepage_url)
+    word_cloud_path = homepage_url_record.word_cloud_path
+    if word_cloud_path is None or word_cloud_path == 'dummy_path':
+        word_cloud_path = get_wordcloud(homepage_url)[1:]
         # CompanyHomepageURLModelを更新
-        homepage_url_record.word_cloud_path = wordcloud_path
+        homepage_url_record.word_cloud_path = word_cloud_path
         homepage_url_record.save()
-    return JsonResponse({'image_path': wordcloud_path})
+    return JsonResponse({image_path_key: word_cloud_path})
