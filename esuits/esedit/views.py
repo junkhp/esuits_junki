@@ -286,26 +286,19 @@ def get_wordcloud_path(request):
     # 以下開発環境
     # CompanyHomepageURLModelにwordcloud_pathが存在している場合はその画像のパスを取り出す
     try:
-        word_cloud_path = CompanyHomepageURLModel.objects.get(homepage_url=homepage_url).word_cloud_path
+        homepage_url_record = CompanyHomepageURLModel.objects.get(homepage_url=homepage_url)
+        word_cloud_path = homepage_url_record.word_cloud_path
 
-    # 存在しない場合は新しくワードクラウドを作成
+    # URLが存在しない場合
     except:
-        print('存在しないURL')
+        return JsonResponse({image_path_key: failed_image_path})
+
+    if word_cloud_path is None:
         try:
             word_cloud_path = get_wordcloud(homepage_url)[1:]
-             # データベースに保存
-
-            new_word_cloud = CompanyHomepageURLModel(company=es_record.company,
-                    homepage_url=homepage_url, word_cloud_path=word_cloud_path)
-            new_word_cloud.save()
+            # CompanyHomepageURLModelを更新
+            homepage_url_record.word_cloud_path = word_cloud_path
+            homepage_url_record.save()
         except:
             return JsonResponse({image_path_key: failed_image_path})
-
-    homepage_url_record = CompanyHomepageURLModel.objects.get(homepage_url=homepage_url)
-    word_cloud_path = homepage_url_record.word_cloud_path
-    if word_cloud_path is None or word_cloud_path == 'dummy_path':
-        word_cloud_path = get_wordcloud(homepage_url)[1:]
-        # CompanyHomepageURLModelを更新
-        homepage_url_record.word_cloud_path = word_cloud_path
-        homepage_url_record.save()
     return JsonResponse({image_path_key: word_cloud_path})
